@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    <link rel="stylesheet" href="login.css">
+    <title>Supernova</title>
+    
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-auth-compat.js"></script>
+    
+    <!-- Configuração Firebase -->
+    <script>
+        // Sua configuração do Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyBzdrAtJoBUONdyHsEPrzWDTH9FMg1xW78",
+            authDomain: "supernova-372bf.firebaseapp.com",
+            projectId: "supernova-372bf",
+            storageBucket: "supernova-372bf.appspot.com",
+            messagingSenderId: "917055386010",
+            appId: "1:917055386010:web:3f27d9173e3dd7fbdf8a23"
+        };
+
+        // Inicializa o Firebase
+        const app = firebase.initializeApp(firebaseConfig);
+        
+        // Cria referências globais para os serviços
+        const db = firebase.firestore();
+        const auth = firebase.auth();
+        
+        console.log("Firebase configurado com sucesso!");
+    </script>
+</head>
+
+<body>
+    <main class="container">
+        <form id="loginForm">
+            <h1>Supernova</h1>
+            <div class="input-box">
+                <label for="email" class="sr-only">E-mail</label>
+                <input id="email" placeholder="E-mail" type="email" required>
+                <i class="bx bxs-user"></i>
+            </div>
+            <div class="input-box">
+                <label for="senha" class="sr-only">Senha</label>
+                <input id="senha" placeholder="Senha" type="password" required>
+                <i class="bx bxs-lock-alt"></i>
+            </div>
+
+            <div class="remember-forgot">
+                <label>
+                    <input type="checkbox">
+                    Lembrar senha
+                </label>
+                <a href="#">Esqueci a senha</a>
+            </div>
+
+            <button type="submit" class="login">Login</button>
+
+            <div class="register-link">
+                <p>Não tem uma conta? <a href="./registrar.html">Cadastre-se</a></p>
+            </div>
+        </form>
+    </main>
+
+    <!-- Seu código JavaScript para login -->
+    <script>
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const email = document.getElementById('email').value;
+            const senha = document.getElementById('senha').value;
+            
+            // Função de login com Firebase
+            auth.signInWithEmailAndPassword(email, senha)
+                .then((userCredential) => {
+                    // Login bem-sucedido
+                    const user = userCredential.user;
+                    console.log("Usuário logado:", user);
+                    
+                    // Redireciona para a página taverna.html
+                    window.location.href = './taverna.html';
+                })
+                .catch((error) => {
+                    // Tratamento de erros
+                    const errorCode = error.code;
+                    const errorMessage = error.message;
+                    console.error("Erro no login:", errorCode, errorMessage);
+                    
+                    // Exibe mensagem de erro para o usuário
+                    if (errorCode === 'auth/user-not-found') {
+                        alert('Usuário não encontrado. Por favor, verifique seu e-mail.');
+                    } else if (errorCode === 'auth/wrong-password') {
+                        alert('Senha incorreta. Tente novamente.');
+                    } else {
+                        alert('Erro ao fazer login: ' + errorMessage);
+                    }
+                });
+        });
+    </script>
+</body>
+
+</html>

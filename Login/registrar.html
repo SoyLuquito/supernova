@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    <link rel="stylesheet" href="registrar.css">
+    <title>Registro - Supernova</title>
+
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    
+    <!-- Configuração Firebase -->
+    <script src="firebase-config.js"></script>
+</head>
+
+</head>
+
+<body>
+    <main class="container">
+        <form id="formCadastro">
+            <h1>Criar Conta</h1>
+            
+            <div class="input-box">
+                <label for="email" class="sr-only">E-mail</label>
+                <input id="email" placeholder="E-mail" type="email" required>
+                <i class="bx bxs-envelope"></i>
+            </div>
+            
+            <div class="input-box">
+                <label for="usuario" class="sr-only">Nome de Usuário</label>
+                <input id="usuario" placeholder="Nome de Usuário" type="text" required>
+                <i class="bx bxs-user"></i>
+            </div>
+            
+            <div class="input-box">
+                <label for="senha" class="sr-only">Senha (mínimo 6 caracteres)</label>
+                <input id="senha" placeholder="Senha" type="password" minlength="6" required>
+                <i class="bx bxs-lock-alt"></i>
+            </div>
+            
+            <div class="input-box">
+                <label for="confirmar-senha" class="sr-only">Confirmar Senha</label>
+                <input id="confirmar-senha" placeholder="Confirmar Senha" type="password" minlength="6" required>
+                <i class="bx bxs-lock"></i>
+                <span id="senha-error" class="error-message"></span>
+            </div>
+
+            <div class="terms">
+                <label>
+                    <input id="termos" type="checkbox" required>
+                    Eu concordo com os <a href="#">Termos de Serviço</a> e <a href="#">Política de Privacidade</a>
+                </label>
+            </div>
+
+            <button type="submit" class="register">Registrar</button>
+
+            <div class="login-link">
+                <p>Já tem uma conta? <a href="./login.html">Faça login</a></p>
+            </div>
+        </form>
+    </main>
+
+    <script>
+        document.getElementById('formCadastro').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            // Validações
+            const senha = document.getElementById('senha').value;
+            const confirmarSenha = document.getElementById('confirmar-senha').value;
+            
+            if (senha !== confirmarSenha) {
+                document.getElementById('senha-error').textContent = "As senhas não coincidem";
+                return;
+            }
+            
+            if (!document.getElementById('termos').checked) {
+                alert("Você deve aceitar os termos de serviço");
+                return;
+            }
+            
+            // Dados do formulário
+            const email = document.getElementById('email').value;
+            const usuario = document.getElementById('usuario').value;
+            
+            try {
+                // 1. Cria usuário no Firebase Auth
+                const userCredential = await auth.createUserWithEmailAndPassword(email, senha);
+                
+                // 2. Salva dados adicionais no Firestore
+                await db.collection('usuarios').doc(userCredential.user.uid).set({
+                    email: email,
+                    usuario: usuario,
+                    dataCriacao: firebase.firestore.FieldValue.serverTimestamp(),
+                    ultimoLogin: firebase.firestore.FieldValue.serverTimestamp()
+                });
+                
+                // 3. Cria documento inicial do personagem
+                await db.collection('personagens').doc(userCredential.user.uid).set({
+                    dono: userCredential.user.uid,
+                    nome: usuario,
+                    nivel: 1,
+                    xp: 0,
+                    atributos: {
+                        forca: 5,
+                        agilidade: 5,
+                        inteligencia: 5
+                    },
+                    inventario: []
+                });
+                
+                alert('Cadastro realizado com sucesso!');
+                window.location.href = 'personagens.html';
+                
+            } catch (error) {
+                console.error("Erro no cadastro:", error);
+                
+                // Tratamento de erros comuns
+                if (error.code === 'auth/email-already-in-use') {
+                    alert('Este e-mail já está em uso.');
+                } else if (error.code === 'auth/weak-password') {
+                    alert('A senha deve ter no mínimo 6 caracteres.');
+                } else {
+                    alert('Erro ao cadastrar: ' + error.message);
+                }
+            }
+        });
+
+        // Validação em tempo real da confirmação de senha
+        document.getElementById('confirmar-senha').addEventListener('input', function() {
+            const senha = document.getElementById('senha').value;
+            const confirmarSenha = this.value;
+            const errorElement = document.getElementById('senha-error');
+            
+            if (senha !== confirmarSenha) {
+                errorElement.textContent = "As senhas não coincidem";
+            } else {
+                errorElement.textContent = "";
+            }
+        });
+    </script>
+</body>
+
+</html>
