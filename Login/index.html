@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    <link rel="stylesheet" href="index.css">
+    <title>Menu Principal - RPG</title>
+</head>
+<body>
+    <main class="main-container">
+        <!-- Painel do Personagem (Esquerda) -->
+        <div class="character-panel">
+            <div class="portrait-container">
+                <img src="./img/character.gif" alt="Personagem" class="character-gif">
+            </div>
+            
+            <div class="character-stats">
+                <h2 class="character-name">Nome do Jogador</h2>
+                <p class="character-class">Guerreiro - Nível 5</p>
+                
+                <div class="stat-bar">
+                    <label>HP:</label>
+                    <div class="bar-container">
+                        <div class="bar hp-bar" style="width: 80%"></div>
+                        <span>80/100</span>
+                    </div>
+                </div>
+                
+                <div class="stat-bar">
+                    <label>Mana:</label>
+                    <div class="bar-container">
+                        <div class="bar mana-bar" style="width: 45%"></div>
+                        <span>45/100</span>
+                    </div>
+                </div>
+                
+                <div class="stat-bar">
+                    <label>XP:</label>
+                    <div class="bar-container">
+                        <div class="bar xp-bar" style="width: 60%"></div>
+                        <span>600/1000</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="character-menu">
+                <button class="char-btn"><i class='bx bx-stats'></i> Atributos</button>
+                <button class="char-btn"><i class='bx bx-run'></i> Habilidades</button>
+                <button class="char-btn"><i class='bx bx-cube'></i> Inventário</button>
+            </div>
+        </div>
+        
+        <!-- Menu Principal (Centro) -->
+        <div class="main-menu">
+            <h1 class="game-title">Reino das Sombras</h1>
+            <p class="welcome-message">Bem-vindo de volta, aventureiro!</p>
+            
+            <div class="location-buttons">
+                <button class="location-btn city-btn">
+                    <i class='bx bx-buildings'></i> Cidade
+                </button>
+                <button class="location-btn dungeon-btn">
+                    <i class='bx bx-door-open'></i> Masmorras
+                </button>
+                <button class="location-btn boss-btn">
+                    <i class='bx bx-skull'></i> Boss
+                </button>
+                <a href="./login.html" class="location-btn logout-btn">
+                    <i class='bx bx-log-out'></i> Deslogar
+                </a>
+            </div>
+        </div>
+    </main>
+    <script src="index.js"></script>
+</body>
+</html>
