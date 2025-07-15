@@ -6,6 +6,44 @@
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
     <link rel="stylesheet" href="index.css">
     <title>Menu Principal - RPG</title>
+
+    <!-- Firebase (abordagem modular) -->
+    <script type="module">
+        // Importações do Firebase
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-app.js";
+        import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-auth.js";
+        import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-firestore.js";
+
+        // Configuração do Firebase (seus dados)
+        const firebaseConfig = {
+            apiKey: "AIzaSyBzdrAtJoBUONdyHsEPrzWDTH9FMg1xW78",
+            authDomain: "supernova-372bf.firebaseapp.com",
+            projectId: "supernova-372bf",
+            storageBucket: "supernova-372bf.appspot.com",
+            messagingSenderId: "917055386010",
+            appId: "1:917055386010:web:3f27d9173e3dd7fbdf8a23"
+        };
+
+        // Inicialização
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // Teste de conexão (opcional - pode remover depois)
+        signInAnonymously(auth)
+            .then(() => {
+                console.log("Conexão com Firebase OK!");
+                addDoc(collection(db, "testes"), {
+                    mensagem: "Conexão estabelecida em: " + new Date().toLocaleString()
+                });
+            })
+            .catch((error) => {
+                console.error("Erro no Firebase:", error);
+            });
+
+        // Disponibiliza para outros scripts (opcional)
+        window.firebase = { app, auth, db };
+    </script>
 </head>
 <body>
     <main class="main-container">
