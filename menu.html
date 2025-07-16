@@ -6,80 +6,19 @@
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
     <link rel="stylesheet" href="menu.css">
     <title>Menu Principal - RPG</title>
-
-    <!-- Firebase (abordagem modular) -->
-    <script type="module">
-        // Importações do Firebase
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-app.js";
-        import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-auth.js";
-        import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-firestore.js";
-
-        // Configuração do Firebase (seus dados)
-        const firebaseConfig = {
-            apiKey: "AIzaSyBzdrAtJoBUONdyHsEPrzWDTH9FMg1xW78",
-            authDomain: "supernova-372bf.firebaseapp.com",
-            projectId: "supernova-372bf",
-            storageBucket: "supernova-372bf.appspot.com",
-            messagingSenderId: "917055386010",
-            appId: "1:917055386010:web:3f27d9173e3dd7fbdf8a23"
-        };
-
-        // Inicialização
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
-
-        // Teste de conexão (opcional - pode remover depois)
-        signInAnonymously(auth)
-            .then(() => {
-                console.log("Conexão com Firebase OK!");
-                addDoc(collection(db, "testes"), {
-                    mensagem: "Conexão estabelecida em: " + new Date().toLocaleString()
-                });
-            })
-            .catch((error) => {
-                console.error("Erro no Firebase:", error);
-            });
-
-        // Disponibiliza para outros scripts (opcional)
-        window.firebase = { app, auth, db };
-    </script>
 </head>
 
 <body>
-    <script>
-        firebase.auth().onAuthStateChanged(async (user) => {
-            if (!user) {
-                window.location.href = 'index.html';  // Se não estiver logado
-                return;
-            }
-            
-            const userDoc = await firebase.firestore()
-                .collection('usuarios')
-                .doc(user.uid)
-                .get();
-            
-            if (!userDoc.exists || !userDoc.data().classe) {
-                window.location.href = 'escolher-classe.html';  // Se não tiver classe
-                return;
-            }
-            
-            // Se passou nas verificações, carrega o menu
-            const userData = userDoc.data();
-            document.getElementById('nome-personagem').textContent = userData.username;
-            document.getElementById('classe-personagem').textContent = userData.classe;
-        });
-        </script>
     <main class="main-container">
         <!-- Painel do Personagem (Esquerda) -->
         <div class="character-panel">
             <div class="portrait-container">
-                <img src="./img/character.gif" alt="Personagem" class="character-gif">
+                <img src="./img/classes/estudioso.png" alt="Personagem" class="character-gif">
             </div>
             
             <div class="character-stats">
-                <h2 class="character-name">Nome do Jogador</h2>
-                <p class="character-class">Guerreiro - Nível 5</p>
+                <h2 class="character-name" id="nome-personagem">Nome do Jogador</h2>
+                <p class="character-class" id="classe-personagem">Guerreiro - Nível 5</p>
                 
                 <div class="stat-bar">
                     <label>HP:</label>
@@ -115,7 +54,7 @@
         
         <!-- Menu Principal (Centro) -->
         <div class="main-menu">
-            <h1 class="game-title">Reino das Sombras</h1>
+            <h1 class="game-title">Menu Principal</h1>
             <p class="welcome-message">Bem-vindo de volta, aventureiro!</p>
             
             <div class="location-buttons">
@@ -128,12 +67,111 @@
                 <button class="location-btn boss-btn">
                     <i class='bx bx-skull'></i> Boss
                 </button>
-                <a href="./login.html" class="location-btn logout-btn">
+                <button class="location-btn logout-btn">
                     <i class='bx bx-log-out'></i> Deslogar
-                </a>
+                </button>
             </div>
         </div>
     </main>
-    <script src="index.js"></script>
+
+    <!-- Firebase (abordagem modular) -->
+    <script type="module">
+        // Importações do Firebase
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-app.js";
+        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-auth.js";
+        import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-firestore.js";
+
+        // Configuração do Firebase (seus dados)
+        const firebaseConfig = {
+            apiKey: "AIzaSyBzdrAtJoBUONdyHsEPrzWDTH9FMg1xW78",
+            authDomain: "supernova-372bf.firebaseapp.com",
+            projectId: "supernova-372bf",
+            storageBucket: "supernova-372bf.appspot.com",
+            messagingSenderId: "917055386010",
+            appId: "1:917055386010:web:3f27d9173e3dd7fbdf8a23"
+        };
+
+        // Inicialização
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // Função para carregar dados do jogador
+        async function loadPlayerData(userId) {
+            try {
+                const userDoc = await getDoc(doc(db, "usuarios", userId));
+                
+                if (userDoc.exists()) {
+                    const userData = userDoc.data();
+                    
+                    // Dados básicos
+                    document.getElementById('nome-personagem').textContent = userData.username || "Sem nome";
+                    document.getElementById('classe-personagem').textContent = 
+                        `${userData.classe || "Sem classe"}${userData.nivel ? ` - Nível ${userData.nivel}` : ''}`;
+                    
+                    // HP
+                    if (userData.hp !== undefined && userData.maxHp !== undefined) {
+                        const hpPercent = (userData.hp / userData.maxHp) * 100;
+                        document.querySelector('.hp-bar').style.width = `${hpPercent}%`;
+                        document.querySelector('.hp-bar').nextElementSibling.textContent = 
+                            `${userData.hp}/${userData.maxHp}`;
+                    }
+                    
+                    // Mana
+                    if (userData.mana !== undefined && userData.maxMana !== undefined) {
+                        const manaPercent = (userData.mana / userData.maxMana) * 100;
+                        document.querySelector('.mana-bar').style.width = `${manaPercent}%`;
+                        document.querySelector('.mana-bar').nextElementSibling.textContent = 
+                            `${userData.mana}/${userData.maxMana}`;
+                    }
+                    
+                    // XP
+                    if (userData.xp !== undefined && userData.nextLevelXp !== undefined) {
+                        const xpPercent = (userData.xp / userData.nextLevelXp) * 100;
+                        document.querySelector('.xp-bar').style.width = `${xpPercent}%`;
+                        document.querySelector('.xp-bar').nextElementSibling.textContent = 
+                            `${userData.xp}/${userData.nextLevelXp}`;
+                    }
+                    
+                    // Mensagem de boas-vindas
+                    document.querySelector('.welcome-message').textContent = 
+                        `Bem-vindo de volta, ${userData.username || 'aventureiro'}!`;
+                    
+                    // Imagem do personagem (opcional)
+                    if (userData.classe) {
+                        const characterImg = document.querySelector('.character-gif');
+                        // Remove isso se não tiver imagens específicas por classe
+                        characterImg.src = `./img/characters/${userData.classe.toLowerCase()}.gif`;
+                    }
+                } else {
+                    console.error("Documento do usuário não encontrado");
+                    window.location.href = 'escolher-classe.html';
+                }
+            } catch (error) {
+                console.error("Erro ao carregar dados:", error);
+            }
+        }
+
+        // Monitora o estado de autenticação
+        onAuthStateChanged(auth, (user) => {
+            if (!user) {
+                window.location.href = 'index.html';
+                return;
+            }
+            
+            loadPlayerData(user.uid);
+        });
+
+        // Logout
+        document.querySelector('.logout-btn').addEventListener('click', async (e) => {
+            e.preventDefault();
+            try {
+                await signOut(auth);
+                window.location.href = 'index.html';
+            } catch (error) {
+                console.error("Erro ao deslogar:", error);
+            }
+        });
+    </script>
 </body>
 </html>

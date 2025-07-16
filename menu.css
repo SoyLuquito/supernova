@@ -224,3 +224,63 @@ body {
 .logout-btn i {
     font-size: 16px; /* Ajustando o ícone */
 }
+
+/* Responsividade para celulares */
+@media (max-width: 768px) {
+    body {
+        padding: 20px;
+        background-attachment: scroll;
+    }
+
+    .main-container {
+        flex-direction: column;
+        width: 100%;
+        max-width: 100%;
+    }
+
+    .character-panel {
+        width: 100%;
+        margin-bottom: 20px;
+    }
+
+    .portrait-container {
+        height: 150px;
+    }
+
+    .character-menu {
+        flex-direction: row;
+        flex-wrap: wrap;
+    }
+
+    .char-btn {
+        flex: 1 1 100px;
+    }
+
+    .location-btn {
+        padding: 12px;
+        font-size: 16px;
+    }
+
+    .game-title {
+        font-size: 24px;
+    }
+
+    .logout-btn {
+        margin-top: 20px;
+    }
+}
+
+@media (max-width: 480px) {
+    .character-menu {
+        flex-direction: column;
+    }
+
+    .char-btn {
+        width: 100%;
+    }
+
+    .location-btn {
+        padding: 10px;
+        font-size: 14px;
+    }
+}
