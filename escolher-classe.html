@@ -475,8 +475,10 @@
             appId: "1:917055386010:web:3f27d9173e3dd7fbdf8a23"
         };
         
+        // Inicializa o Firebase
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
+        const auth = firebase.auth();
 
         // Adiciona evento de clique para virar o card
         document.querySelectorAll('.classe-card').forEach(card => {
@@ -488,25 +490,63 @@
             });
         });
 
-        // Seleção de classe (agora usando o botão "Selecionar")
+        // Seleção de classe
         document.querySelectorAll('.select-btn').forEach(btn => {
             btn.addEventListener('click', async function(e) {
                 e.stopPropagation(); // Impede que o card vire ao clicar no botão
+                
                 const card = this.closest('.classe-card');
                 const classe = card.getAttribute('data-classe');
-                const user = firebase.auth().currentUser;
+                const user = auth.currentUser;
+                
+                if (!user) {
+                    alert('Usuário não autenticado. Faça login novamente.');
+                    return;
+                }
                 
                 try {
+                    // Define os atributos iniciais baseados na classe escolhida
+                    let hp, mana;
+                    switch(classe) {
+                        case 'escudeiro':
+                            hp = 150;
+                            mana = 50;
+                            break;
+                        case 'trapaceiro':
+                            hp = 100;
+                            mana = 75;
+                            break;
+                        case 'patrulheiro':
+                            hp = 120;
+                            mana = 80;
+                            break;
+                        case 'estudioso':
+                            hp = 90;
+                            mana = 150;
+                            break;
+                        default:
+                            hp = 100;
+                            mana = 100;
+                    }
+                    
+                    // Atualiza o documento do usuário no Firestore
                     await db.collection('usuarios').doc(user.uid).update({
                         classe: classe,
                         personagem_criado: true,
                         nivel: 1,
-                        hp: 100,
-                        mana: classe === 'estudioso' ? 150 : 100
+                        hp: hp,
+                        hp_max: hp,
+                        mana: mana,
+                        mana_max: mana,
+                        experiencia: 0,
+                        data_criacao: firebase.firestore.FieldValue.serverTimestamp()
                     });
+                    
+                    // Redireciona para o menu
                     window.location.href = 'menu.html';
                 } catch (error) {
-                    alert('Erro ao salvar: ' + error.message);
+                    console.error('Erro ao salvar classe:', error);
+                    alert('Erro ao salvar sua classe. Por favor, tente novamente.');
                 }
             });
         });
