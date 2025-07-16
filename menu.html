@@ -98,44 +98,61 @@
 
         // Sistema de XP e HP
         const XpSystem = {
-            calculateMaxHp: (level) => 100 + (Math.pow(level, 2) * 2),
-            calculateXpNeeded: (level) => 94495 * Math.pow(1.05826, level),
-            
-            updatePlayerUI: (playerData) => {
-                // Atualiza nível e classe
-                document.getElementById('classe-personagem').textContent = 
-                    `${this.capitalizeFirstLetter(playerData.classe || 'Aventureiro')} - Nível ${playerData.nivel || 1}`;
-                
-                // Atualiza HP
-                const maxHp = this.calculateMaxHp(playerData.nivel);
-                this.updateStatusBar('.hp-bar', playerData.hp, maxHp);
-                
-                // Atualiza Mana
-                if (playerData.mana !== undefined) {
-                    this.updateStatusBar('.mana-bar', playerData.mana, playerData.mana_max || 100);
-                }
-                
-                // Atualiza XP
-                const xpNeeded = this.calculateXpNeeded(playerData.nivel);
-                this.updateStatusBar('.xp-bar', playerData.experiencia || 0, xpNeeded);
+            calculateMaxHp: function(level) {
+                return 100 + (Math.pow(level || 1, 2) * 2);
             },
             
-            updateStatusBar: (selector, current, max) => {
-                if (current !== undefined && max !== undefined) {
-                    const percent = (current / max) * 100;
-                    const bar = document.querySelector(selector);
-                    if (bar) {
-                        bar.style.width = `${percent}%`;
-                        const span = bar.parentNode.querySelector('span');
-                        if (span) {
-                            span.textContent = `${Math.floor(current)}/${Math.floor(max)}`;
-                        }
-                    }
-                }
+            calculateXpNeeded: function(level) {
+                return 94495 * Math.pow(1.05826, level || 1);
             },
             
-            capitalizeFirstLetter: (string) => {
+            capitalizeFirstLetter: function(string) {
                 return string ? string.charAt(0).toUpperCase() + string.slice(1) : "";
+            },
+            
+            updateStatusBar: function(selector, current, max) {
+                if (current === undefined || max === undefined) return;
+                const percent = (current / max) * 100;
+                const bar = document.querySelector(selector);
+                if (bar) {
+                    bar.style.width = `${percent}%`;
+                    const span = bar.nextElementSibling;
+                    if (span) span.textContent = `${Math.floor(current)}/${Math.floor(max)}`;
+                }
+            },
+            
+            updatePlayerUI: function(playerData) {
+                try {
+                    playerData = playerData || {};
+                    
+                    // Atualiza textos básicos
+                    document.getElementById('nome-personagem').textContent = 
+                        playerData.nome || playerData.username || "Aventureiro";
+                    
+                    document.getElementById('classe-personagem').textContent = 
+                        `${this.capitalizeFirstLetter(playerData.classe || 'Aventureiro')} - Nível ${playerData.nivel || 1}`;
+                    
+                    document.getElementById('welcome-message').textContent = 
+                        `Bem-vindo de volta, ${playerData.nome || playerData.username || 'Aventureiro'}!`;
+                    
+                    // Atualiza barras de status
+                    const maxHp = this.calculateMaxHp(playerData.nivel);
+                    this.updateStatusBar('.hp-bar', playerData.hp || maxHp, maxHp);
+                    
+                    this.updateStatusBar('.mana-bar', playerData.mana || 0, playerData.mana_max || 100);
+                    
+                    const xpNeeded = this.calculateXpNeeded(playerData.nivel);
+                    this.updateStatusBar('.xp-bar', playerData.experiencia || 0, xpNeeded);
+                    
+                    // Atualiza imagem
+                    const img = document.getElementById('character-image');
+                    if (playerData.classe) {
+                        img.src = `./img/classes/${playerData.classe.toLowerCase()}.png`;
+                        img.onerror = () => img.src = './img/classes/default.png';
+                    }
+                } catch (error) {
+                    console.error("Erro ao atualizar UI:", error);
+                }
             }
         };
 
@@ -146,28 +163,10 @@
                 
                 if (userDoc.exists()) {
                     const userData = userDoc.data();
-                    
-                    // Garante valores padrão
-                    userData.nivel = userData.nivel || 1;
-                    userData.hp = userData.hp ?? XpSystem.calculateMaxHp(userData.nivel);
-                    userData.experiencia = userData.experiencia || 0;
-                    
-                    // Atualiza UI
-                    document.getElementById('nome-personagem').textContent = 
-                        userData.nome || userData.username || "Aventureiro";
                     XpSystem.updatePlayerUI(userData);
-                    document.getElementById('welcome-message').textContent = 
-                        `Bem-vindo de volta, ${userData.nome || userData.username || 'Aventureiro'}!`;
-                    
-                    // Atualiza imagem do personagem
-                    if (userData.classe) {
-                        const characterImg = document.getElementById('character-image');
-                        characterImg.src = `./img/classes/${userData.classe.toLowerCase()}.png`;
-                        characterImg.onerror = () => characterImg.src = './img/classes/default.png';
-                    }
-                    
                     return userData;
                 } else {
+                    console.error("Documento do usuário não encontrado");
                     window.location.href = 'escolher-classe.html';
                 }
             } catch (error) {
