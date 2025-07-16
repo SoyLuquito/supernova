@@ -13,7 +13,7 @@
         <!-- Painel do Personagem (Esquerda) -->
         <div class="character-panel">
             <div class="portrait-container">
-                <img src="./img/classes/estudioso.png" alt="Personagem" class="character-gif">
+                <img src="./img/classes/default.png" alt="Personagem" class="character-gif" id="character-image">
             </div>
             
             <div class="character-stats">
@@ -55,7 +55,7 @@
         <!-- Menu Principal (Centro) -->
         <div class="main-menu">
             <h1 class="game-title">Menu Principal</h1>
-            <p class="welcome-message">Bem-vindo de volta, aventureiro!</p>
+            <p class="welcome-message" id="welcome-message">Bem-vindo de volta, aventureiro!</p>
             
             <div class="location-buttons">
                 <button class="location-btn city-btn">
@@ -81,7 +81,7 @@
         import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-auth.js";
         import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-firestore.js";
 
-        // Configuração do Firebase (seus dados)
+        // Configuração do Firebase
         const firebaseConfig = {
             apiKey: "AIzaSyBzdrAtJoBUONdyHsEPrzWDTH9FMg1xW78",
             authDomain: "supernova-372bf.firebaseapp.com",
@@ -104,44 +104,27 @@
                 if (userDoc.exists()) {
                     const userData = userDoc.data();
                     
-                    // Dados básicos
-                    document.getElementById('nome-personagem').textContent = userData.username || "Sem nome";
+                    // Atualiza nome e classe
+                    document.getElementById('nome-personagem').textContent = userData.nome || userData.username || "Aventureiro";
                     document.getElementById('classe-personagem').textContent = 
-                        `${userData.classe || "Sem classe"}${userData.nivel ? ` - Nível ${userData.nivel}` : ''}`;
+                        `${capitalizeFirstLetter(userData.classe) || "Sem classe"}${userData.nivel ? ` - Nível ${userData.nivel}` : ''}`;
                     
-                    // HP
-                    if (userData.hp !== undefined && userData.maxHp !== undefined) {
-                        const hpPercent = (userData.hp / userData.maxHp) * 100;
-                        document.querySelector('.hp-bar').style.width = `${hpPercent}%`;
-                        document.querySelector('.hp-bar').nextElementSibling.textContent = 
-                            `${userData.hp}/${userData.maxHp}`;
-                    }
+                    // Atualiza barras de status
+                    updateStatusBar('.hp-bar', userData.hp, userData.hp_max || userData.maxHp);
+                    updateStatusBar('.mana-bar', userData.mana, userData.mana_max || userData.maxMana);
+                    updateStatusBar('.xp-bar', userData.experiencia, userData.nextLevelXp || 1000);
                     
-                    // Mana
-                    if (userData.mana !== undefined && userData.maxMana !== undefined) {
-                        const manaPercent = (userData.mana / userData.maxMana) * 100;
-                        document.querySelector('.mana-bar').style.width = `${manaPercent}%`;
-                        document.querySelector('.mana-bar').nextElementSibling.textContent = 
-                            `${userData.mana}/${userData.maxMana}`;
-                    }
+                    // Atualiza mensagem de boas-vindas
+                    document.getElementById('welcome-message').textContent = 
+                        `Bem-vindo de volta, ${userData.nome || userData.username || 'Aventureiro'}!`;
                     
-                    // XP
-                    if (userData.xp !== undefined && userData.nextLevelXp !== undefined) {
-                        const xpPercent = (userData.xp / userData.nextLevelXp) * 100;
-                        document.querySelector('.xp-bar').style.width = `${xpPercent}%`;
-                        document.querySelector('.xp-bar').nextElementSibling.textContent = 
-                            `${userData.xp}/${userData.nextLevelXp}`;
-                    }
-                    
-                    // Mensagem de boas-vindas
-                    document.querySelector('.welcome-message').textContent = 
-                        `Bem-vindo de volta, ${userData.username || 'aventureiro'}!`;
-                    
-                    // Imagem do personagem (opcional)
+                    // Atualiza imagem do personagem
                     if (userData.classe) {
-                        const characterImg = document.querySelector('.character-gif');
-                        // Remove isso se não tiver imagens específicas por classe
-                        characterImg.src = `./img/characters/${userData.classe.toLowerCase()}.gif`;
+                        const characterImg = document.getElementById('character-image');
+                        characterImg.src = `./img/classes/${userData.classe.toLowerCase()}.png`;
+                        characterImg.onerror = function() {
+                            this.src = './img/classes/default.png';
+                        };
                     }
                 } else {
                     console.error("Documento do usuário não encontrado");
@@ -150,6 +133,21 @@
             } catch (error) {
                 console.error("Erro ao carregar dados:", error);
             }
+        }
+
+        // Função auxiliar para atualizar barras de status
+        function updateStatusBar(selector, current, max) {
+            if (current !== undefined && max !== undefined) {
+                const percent = (current / max) * 100;
+                const bar = document.querySelector(selector);
+                bar.style.width = `${percent}%`;
+                bar.nextElementSibling.textContent = `${current}/${max}`;
+            }
+        }
+
+        // Função para capitalizar a primeira letra
+        function capitalizeFirstLetter(string) {
+            return string ? string.charAt(0).toUpperCase() + string.slice(1) : "";
         }
 
         // Monitora o estado de autenticação
@@ -170,6 +168,7 @@
                 window.location.href = 'index.html';
             } catch (error) {
                 console.error("Erro ao deslogar:", error);
+                alert("Erro ao deslogar. Por favor, tente novamente.");
             }
         });
     </script>
