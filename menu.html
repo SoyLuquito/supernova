@@ -1,21 +1,10 @@
 <!DOCTYPE html>
 <html lang="pt-br">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Página de login do Supernova">
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
-    <link rel="stylesheet" href="index.css">
-<<<<<<< HEAD
-    
-    <!-- Firebase SDK (versão compat) -->
-    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-auth-compat.js"></script>
-    
-    <!-- Inicialização do Firebase -->
-    <script>
-=======
+    <link rel="stylesheet" href="menu.css">
     <title>Menu Principal - RPG</title>
 
     <!-- Firebase (abordagem modular) -->
@@ -26,7 +15,6 @@
         import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-firestore.js";
 
         // Configuração do Firebase (seus dados)
->>>>>>> 789076928c49656e43ed2bfd6ede376028eba2e5
         const firebaseConfig = {
             apiKey: "AIzaSyBzdrAtJoBUONdyHsEPrzWDTH9FMg1xW78",
             authDomain: "supernova-372bf.firebaseapp.com",
@@ -35,8 +23,6 @@
             messagingSenderId: "917055386010",
             appId: "1:917055386010:web:3f27d9173e3dd7fbdf8a23"
         };
-<<<<<<< HEAD
-=======
 
         // Inicialização
         const app = initializeApp(firebaseConfig);
@@ -59,6 +45,7 @@
         window.firebase = { app, auth, db };
     </script>
 </head>
+
 <body>
     <main class="main-container">
         <!-- Painel do Personagem (Esquerda) -->
@@ -102,78 +89,28 @@
                 <button class="char-btn"><i class='bx bx-cube'></i> Inventário</button>
             </div>
         </div>
->>>>>>> 789076928c49656e43ed2bfd6ede376028eba2e5
         
-        // Inicialização do Firebase
-        const app = firebase.initializeApp(firebaseConfig);
-        const auth = firebase.auth();
-    </script>
-    
-    <title>Supernova - Login</title>
-</head>
-
-<body>
-    <main class="container">
-        <form id="loginForm">
-            <h1>Supernova</h1>
-            <div class="input-box">
-                <label for="email" class="sr-only">E-mail</label>
-                <input id="email" placeholder="E-mail" type="email" required>
-                <i class="bx bxs-user"></i>
+        <!-- Menu Principal (Centro) -->
+        <div class="main-menu">
+            <h1 class="game-title">Reino das Sombras</h1>
+            <p class="welcome-message">Bem-vindo de volta, aventureiro!</p>
+            
+            <div class="location-buttons">
+                <button class="location-btn city-btn">
+                    <i class='bx bx-buildings'></i> Cidade
+                </button>
+                <button class="location-btn dungeon-btn">
+                    <i class='bx bx-door-open'></i> Masmorras
+                </button>
+                <button class="location-btn boss-btn">
+                    <i class='bx bx-skull'></i> Boss
+                </button>
+                <a href="./login.html" class="location-btn logout-btn">
+                    <i class='bx bx-log-out'></i> Deslogar
+                </a>
             </div>
-            <div class="input-box">
-                <label for="senha" class="sr-only">Senha</label>
-                <input id="senha" placeholder="Senha" type="password" required>
-                <i class="bx bxs-lock-alt"></i>
-            </div>
-
-            <div class="remember-forgot">
-                <label>
-                    <input type="checkbox">
-                    Lembrar senha
-                </label>
-                <a href="#">Esqueci a senha</a>
-            </div>
-
-            <button type="submit" class="login">Login</button>
-
-            <div class="register-link">
-                <p>Não tem uma conta? <a href="./registrar.html">Cadastre-se</a></p>
-            </div>
-        </form>
+        </div>
     </main>
-
-    <!-- Script de login -->
-    <script>
-        document.getElementById('loginForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            const email = document.getElementById('email').value;
-            const senha = document.getElementById('senha').value;
-            
-            auth.signInWithEmailAndPassword(email, senha)
-                .then((userCredential) => {
-                    // Login bem-sucedido
-                    window.location.href = './menu.html'; // Corrigido para menu.html
-                })
-                .catch((error) => {
-                    const errorCode = error.code;
-                    const errorMessage = error.message;
-                    
-                    if (errorCode === 'auth/user-not-found') {
-                        alert('Usuário não encontrado. Por favor, verifique seu e-mail.');
-                    } else if (errorCode === 'auth/wrong-password') {
-                        alert('Senha incorreta. Tente novamente.');
-                    } else {
-                        alert('Erro ao fazer login: ' + errorMessage);
-                    }
-                });
-        });
-    </script>
+    <script src="index.js"></script>
 </body>
-<<<<<<< HEAD
-
 </html>
-=======
-</html>
->>>>>>> 789076928c49656e43ed2bfd6ede376028eba2e5
