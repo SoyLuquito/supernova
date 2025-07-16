@@ -8,13 +8,12 @@
     <link rel="stylesheet" href="index.css">
     <title>Supernova - Login</title>
 
-    <!-- 1. Adicione os SDKs do Firebase -->
+    <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore-compat.js"></script>
 
-    <!-- 2. Configuração e inicialização do Firebase -->
     <script>
-        // Sua configuração do Firebase
         const firebaseConfig = {
             apiKey: "AIzaSyBzdrAtJoBUONdyHsEPrzWDTH9FMg1xW78",
             authDomain: "supernova-372bf.firebaseapp.com",
@@ -24,9 +23,9 @@
             appId: "1:917055386010:web:3f27d9173e3dd7fbdf8a23"
         };
 
-        // Inicializa o Firebase
         const app = firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth();
+        const db = firebase.firestore();
     </script>
 </head>
 
@@ -61,7 +60,6 @@
         </form>
     </main>
 
-    <!-- 3. Script de login -->
     <script>
         document.getElementById('loginForm').addEventListener('submit', function(e) {
             e.preventDefault();
@@ -69,14 +67,17 @@
             const email = document.getElementById('email').value;
             const senha = document.getElementById('senha').value;
             
-            // Função de login com Firebase
             auth.signInWithEmailAndPassword(email, senha)
-                .then((userCredential) => {
-                    // Login bem-sucedido
-                    window.location.href = './menu.html'; // Redireciona para a página do menu
+                .then(async (userCredential) => {
+                    const userDoc = await db.collection('usuarios').doc(userCredential.user.uid).get();
+                    
+                    if (!userDoc.exists || !userDoc.data().classe) {
+                        window.location.href = 'escolher-classe.html';
+                    } else {
+                        window.location.href = 'menu.html';
+                    }
                 })
                 .catch((error) => {
-                    // Tratamento de erros
                     const errorCode = error.code;
                     const errorMessage = error.message;
                     

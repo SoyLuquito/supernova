@@ -98,11 +98,17 @@
                 const userCredential = await auth.createUserWithEmailAndPassword(email, senha);
                 
                 // 2. Salvar nome de usuário no Firestore
-                await db.collection('usuarios').doc(userCredential.user.uid).set({
-                    username: usuario,
-                    email: email,
-                    criadoEm: firebase.firestore.FieldValue.serverTimestamp()
-                });
+                // Dentro do script de registro, substitua esta parte:
+            await db.collection('usuarios').doc(userCredential.user.uid).set({
+                username: usuario,
+                email: email,
+                criadoEm: firebase.firestore.FieldValue.serverTimestamp(),
+                classe: null,  // ← Novo campo adicionado
+                personagem_criado: false,  // ← Novo campo
+                nivel: null,
+                hp: null,
+                mana: null
+            });
                 
                 // 3. Redirecionar para a página inicial
                 window.location.href = './menu.html';
