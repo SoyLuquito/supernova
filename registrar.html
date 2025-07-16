@@ -7,8 +7,26 @@
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
     <link rel="stylesheet" href="registrar.css">
     <title>Registro - Supernova</title>
-</head>
-
+    
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore-compat.js"></script>
+    
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyBzdrAtJoBUONdyHsEPrzWDTH9FMg1xW78",
+            authDomain: "supernova-372bf.firebaseapp.com",
+            projectId: "supernova-372bf",
+            storageBucket: "supernova-372bf.appspot.com",
+            messagingSenderId: "917055386010",
+            appId: "1:917055386010:web:3f27d9173e3dd7fbdf8a23"
+        };
+        
+        const app = firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+    </script>
 </head>
 
 <body>
@@ -51,89 +69,64 @@
             <button type="submit" class="register">Registrar</button>
 
             <div class="login-link">
-                <p>Já tem uma conta? <a href="./login.html">Faça login</a></p>
+                <p>Já tem uma conta? <a href="./index.html">Faça login</a></p>
             </div>
         </form>
     </main>
 
     <script>
-        document.getElementById('formCadastro').addEventListener('submit', async (e) => {
+        document.getElementById('formCadastro').addEventListener('submit', async function(e) {
             e.preventDefault();
             
-            // Validações
+            const email = document.getElementById('email').value;
+            const usuario = document.getElementById('usuario').value;
             const senha = document.getElementById('senha').value;
             const confirmarSenha = document.getElementById('confirmar-senha').value;
             
+            // Validação de senha
             if (senha !== confirmarSenha) {
-                document.getElementById('senha-error').textContent = "As senhas não coincidem";
+                document.getElementById('senha-error').textContent = 'As senhas não coincidem';
                 return;
             }
             
-            if (!document.getElementById('termos').checked) {
-                alert("Você deve aceitar os termos de serviço");
-                return;
-            }
-            
-            // Dados do formulário
-            const email = document.getElementById('email').value;
-            const usuario = document.getElementById('usuario').value;
+            const btnRegistrar = document.querySelector('.register');
+            btnRegistrar.disabled = true;
+            btnRegistrar.textContent = 'Registrando...';
             
             try {
-                // 1. Cria usuário no Firebase Auth
+                // 1. Criar usuário no Authentication
                 const userCredential = await auth.createUserWithEmailAndPassword(email, senha);
                 
-                // 2. Salva dados adicionais no Firestore
+                // 2. Salvar nome de usuário no Firestore
                 await db.collection('usuarios').doc(userCredential.user.uid).set({
+                    username: usuario,
                     email: email,
-                    usuario: usuario,
-                    dataCriacao: firebase.firestore.FieldValue.serverTimestamp(),
-                    ultimoLogin: firebase.firestore.FieldValue.serverTimestamp()
+                    criadoEm: firebase.firestore.FieldValue.serverTimestamp()
                 });
                 
-                // 3. Cria documento inicial do personagem
-                await db.collection('personagens').doc(userCredential.user.uid).set({
-                    dono: userCredential.user.uid,
-                    nome: usuario,
-                    nivel: 1,
-                    xp: 0,
-                    atributos: {
-                        forca: 5,
-                        agilidade: 5,
-                        inteligencia: 5
-                    },
-                    inventario: []
-                });
-                
-                alert('Cadastro realizado com sucesso!');
-                window.location.href = 'personagens.html';
-                
+                // 3. Redirecionar para a página inicial
+                window.location.href = './menu.html';
             } catch (error) {
-                console.error("Erro no cadastro:", error);
-                
-                // Tratamento de erros comuns
-                if (error.code === 'auth/email-already-in-use') {
-                    alert('Este e-mail já está em uso.');
-                } else if (error.code === 'auth/weak-password') {
-                    alert('A senha deve ter no mínimo 6 caracteres.');
-                } else {
-                    alert('Erro ao cadastrar: ' + error.message);
+                let errorMessage = 'Erro ao registrar: ';
+                switch(error.code) {
+                    case 'auth/email-already-in-use':
+                        errorMessage += 'Este e-mail já está em uso';
+                        break;
+                    case 'auth/weak-password':
+                        errorMessage += 'A senha deve ter no mínimo 6 caracteres';
+                        break;
+                    case 'auth/invalid-email':
+                        errorMessage += 'E-mail inválido';
+                        break;
+                    default:
+                        errorMessage += error.message;
                 }
-            }
-        });
-
-        // Validação em tempo real da confirmação de senha
-        document.getElementById('confirmar-senha').addEventListener('input', function() {
-            const senha = document.getElementById('senha').value;
-            const confirmarSenha = this.value;
-            const errorElement = document.getElementById('senha-error');
-            
-            if (senha !== confirmarSenha) {
-                errorElement.textContent = "As senhas não coincidem";
-            } else {
-                errorElement.textContent = "";
+                alert(errorMessage);
+            } finally {
+                btnRegistrar.disabled = false;
+                btnRegistrar.textContent = 'Registrar';
             }
         });
     </script>
 </body>
-
 </html>
