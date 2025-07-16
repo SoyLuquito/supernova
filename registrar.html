@@ -97,20 +97,32 @@
                 // 1. Criar usuário no Authentication
                 const userCredential = await auth.createUserWithEmailAndPassword(email, senha);
                 
-                // 2. Salvar nome de usuário no Firestore
-                // Dentro do script de registro, substitua esta parte:
-            await db.collection('usuarios').doc(userCredential.user.uid).set({
-                username: usuario,
-                email: email,
-                criadoEm: firebase.firestore.FieldValue.serverTimestamp(),
-                classe: null,  // ← Novo campo adicionado
-                personagem_criado: false,  // ← Novo campo
-                nivel: null,
-                hp: null,
-                mana: null
-            });
+                // 2. Calcular valores iniciais de HP e XP
+                const nivelInicial = 1;
+                const hpInicial = 100 + Math.pow(nivelInicial, 2) * 2; // Fórmula: nível² × 2
+                const xpNecessarioProximoNivel = 94495 * Math.pow(1.05826, nivelInicial); // Fórmula: 94.495 × (1.05826)^nível
                 
-                // 3. Redirecionar para a página inicial
+                // 3. Salvar dados do jogador no Firestore
+                await db.collection('usuarios').doc(userCredential.user.uid).set({
+                    username: usuario,
+                    nome: usuario, // Pode ser alterado depois
+                    email: email,
+                    criadoEm: firebase.firestore.FieldValue.serverTimestamp(),
+                    classe: null, // Será definido na escolha de classe
+                    personagem_criado: false,
+                    nivel: nivelInicial,
+                    experiencia: 0,
+                    hp: hpInicial,
+                    hp_max: hpInicial,
+                    mana: 100, // Valor padrão inicial
+                    mana_max: 100,
+                    nextLevelXp: xpNecessarioProximoNivel,
+                    gold: 0, // Dinheiro inicial
+                    equipamentos: {}, // Itens equipados
+                    inventario: [] // Itens no inventário
+                });
+                
+                // 4. Redirecionar para a página de escolher classe
                 window.location.href = './escolher-classe.html';
             } catch (error) {
                 let errorMessage = 'Erro ao registrar: ';
@@ -133,6 +145,11 @@
                 btnRegistrar.textContent = 'Registrar';
             }
         });
+
+        // Função auxiliar para capitalizar a primeira letra (usada depois)
+        function capitalizeFirstLetter(string) {
+            return string ? string.charAt(0).toUpperCase() + string.slice(1) : "";
+        }
     </script>
 </body>
 </html>

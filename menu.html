@@ -17,30 +17,30 @@
             </div>
             
             <div class="character-stats">
-                <h2 class="character-name" id="nome-personagem">Nome do Jogador</h2>
-                <p class="character-class" id="classe-personagem">Guerreiro - Nível 5</p>
+                <h2 class="character-name" id="nome-personagem">Carregando...</h2>
+                <p class="character-class" id="classe-personagem">-</p>
                 
                 <div class="stat-bar">
                     <label>HP:</label>
                     <div class="bar-container">
-                        <div class="bar hp-bar" style="width: 80%"></div>
-                        <span>80/100</span>
+                        <div class="bar hp-bar" style="width: 0%"></div>
+                        <span>0/0</span>
                     </div>
                 </div>
                 
                 <div class="stat-bar">
                     <label>Mana:</label>
                     <div class="bar-container">
-                        <div class="bar mana-bar" style="width: 45%"></div>
-                        <span>45/100</span>
+                        <div class="bar mana-bar" style="width: 0%"></div>
+                        <span>0/0</span>
                     </div>
                 </div>
                 
                 <div class="stat-bar">
                     <label>XP:</label>
                     <div class="bar-container">
-                        <div class="bar xp-bar" style="width: 60%"></div>
-                        <span>600/1000</span>
+                        <div class="bar xp-bar" style="width: 0%"></div>
+                        <span>0/0</span>
                     </div>
                 </div>
             </div>
@@ -55,7 +55,7 @@
         <!-- Menu Principal (Centro) -->
         <div class="main-menu">
             <h1 class="game-title">Menu Principal</h1>
-            <p class="welcome-message" id="welcome-message">Bem-vindo de volta, aventureiro!</p>
+            <p class="welcome-message" id="welcome-message">Carregando...</p>
             
             <div class="location-buttons">
                 <button class="location-btn city-btn">
@@ -74,12 +74,12 @@
         </div>
     </main>
 
-    <!-- Firebase (abordagem modular) -->
+    <!-- Firebase SDK -->
     <script type="module">
         // Importações do Firebase
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-app.js";
         import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-auth.js";
-        import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-firestore.js";
+        import { getFirestore, doc, getDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-firestore.js";
 
         // Configuração do Firebase
         const firebaseConfig = {
@@ -96,6 +96,49 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
+        // Sistema de XP e HP
+        const XpSystem = {
+            calculateMaxHp: (level) => 100 + (Math.pow(level, 2) * 2),
+            calculateXpNeeded: (level) => 94495 * Math.pow(1.05826, level),
+            
+            updatePlayerUI: (playerData) => {
+                // Atualiza nível e classe
+                document.getElementById('classe-personagem').textContent = 
+                    `${this.capitalizeFirstLetter(playerData.classe || 'Aventureiro')} - Nível ${playerData.nivel || 1}`;
+                
+                // Atualiza HP
+                const maxHp = this.calculateMaxHp(playerData.nivel);
+                this.updateStatusBar('.hp-bar', playerData.hp, maxHp);
+                
+                // Atualiza Mana
+                if (playerData.mana !== undefined) {
+                    this.updateStatusBar('.mana-bar', playerData.mana, playerData.mana_max || 100);
+                }
+                
+                // Atualiza XP
+                const xpNeeded = this.calculateXpNeeded(playerData.nivel);
+                this.updateStatusBar('.xp-bar', playerData.experiencia || 0, xpNeeded);
+            },
+            
+            updateStatusBar: (selector, current, max) => {
+                if (current !== undefined && max !== undefined) {
+                    const percent = (current / max) * 100;
+                    const bar = document.querySelector(selector);
+                    if (bar) {
+                        bar.style.width = `${percent}%`;
+                        const span = bar.parentNode.querySelector('span');
+                        if (span) {
+                            span.textContent = `${Math.floor(current)}/${Math.floor(max)}`;
+                        }
+                    }
+                }
+            },
+            
+            capitalizeFirstLetter: (string) => {
+                return string ? string.charAt(0).toUpperCase() + string.slice(1) : "";
+            }
+        };
+
         // Função para carregar dados do jogador
         async function loadPlayerData(userId) {
             try {
@@ -104,17 +147,15 @@
                 if (userDoc.exists()) {
                     const userData = userDoc.data();
                     
-                    // Atualiza nome e classe
-                    document.getElementById('nome-personagem').textContent = userData.nome || userData.username || "Aventureiro";
-                    document.getElementById('classe-personagem').textContent = 
-                        `${capitalizeFirstLetter(userData.classe) || "Sem classe"}${userData.nivel ? ` - Nível ${userData.nivel}` : ''}`;
+                    // Garante valores padrão
+                    userData.nivel = userData.nivel || 1;
+                    userData.hp = userData.hp ?? XpSystem.calculateMaxHp(userData.nivel);
+                    userData.experiencia = userData.experiencia || 0;
                     
-                    // Atualiza barras de status
-                    updateStatusBar('.hp-bar', userData.hp, userData.hp_max || userData.maxHp);
-                    updateStatusBar('.mana-bar', userData.mana, userData.mana_max || userData.maxMana);
-                    updateStatusBar('.xp-bar', userData.experiencia, userData.nextLevelXp || 1000);
-                    
-                    // Atualiza mensagem de boas-vindas
+                    // Atualiza UI
+                    document.getElementById('nome-personagem').textContent = 
+                        userData.nome || userData.username || "Aventureiro";
+                    XpSystem.updatePlayerUI(userData);
                     document.getElementById('welcome-message').textContent = 
                         `Bem-vindo de volta, ${userData.nome || userData.username || 'Aventureiro'}!`;
                     
@@ -122,32 +163,16 @@
                     if (userData.classe) {
                         const characterImg = document.getElementById('character-image');
                         characterImg.src = `./img/classes/${userData.classe.toLowerCase()}.png`;
-                        characterImg.onerror = function() {
-                            this.src = './img/classes/default.png';
-                        };
+                        characterImg.onerror = () => characterImg.src = './img/classes/default.png';
                     }
+                    
+                    return userData;
                 } else {
-                    console.error("Documento do usuário não encontrado");
                     window.location.href = 'escolher-classe.html';
                 }
             } catch (error) {
                 console.error("Erro ao carregar dados:", error);
             }
-        }
-
-        // Função auxiliar para atualizar barras de status
-        function updateStatusBar(selector, current, max) {
-            if (current !== undefined && max !== undefined) {
-                const percent = (current / max) * 100;
-                const bar = document.querySelector(selector);
-                bar.style.width = `${percent}%`;
-                bar.nextElementSibling.textContent = `${current}/${max}`;
-            }
-        }
-
-        // Função para capitalizar a primeira letra
-        function capitalizeFirstLetter(string) {
-            return string ? string.charAt(0).toUpperCase() + string.slice(1) : "";
         }
 
         // Monitora o estado de autenticação
@@ -157,7 +182,15 @@
                 return;
             }
             
+            // Carrega dados inicialmente
             loadPlayerData(user.uid);
+            
+            // Configura listener para atualizações em tempo real
+            const userRef = doc(db, "usuarios", user.uid);
+            onSnapshot(userRef, (doc) => {
+                const userData = doc.data();
+                XpSystem.updatePlayerUI(userData);
+            });
         });
 
         // Logout
