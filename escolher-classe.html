@@ -30,24 +30,38 @@
             width: 100px;
             height: 100px;
         }
+        .classes-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            max-width: 800px;
+            margin: 0 auto;
+        }
     </style>
 </head>
 <body>
     <h1>Escolha sua Classe</h1>
     
-    <div class="classe-option" data-classe="guerreiro">
-        <img src="./img/guerreiro.png" alt="Guerreiro">
-        <h2>Guerreiro</h2>
-    </div>
-    
-    <div class="classe-option" data-classe="mago">
-        <img src="./img/mago.png" alt="Mago">
-        <h2>Mago</h2>
-    </div>
-    
-    <div class="classe-option" data-classe="arqueiro">
-        <img src="./img/arqueiro.png" alt="Arqueiro">
-        <h2>Arqueiro</h2>
+    <div class="classes-container">
+        <div class="classe-option" data-classe="escudeiro">
+            <img src="./img/classes/escudeiro.png" alt="Escudeiro">
+            <h2>Escudeiro</h2>
+        </div>
+        
+        <div class="classe-option" data-classe="trapaceiro">
+            <img src="./img/classes/trapaceiro.png" alt="Trapaceiro">
+            <h2>Trapaceiro</h2>
+        </div>
+        
+        <div class="classe-option" data-classe="patrulheiro">
+            <img src="./img/classes/patrulheiro.png" alt="Patrulheiro">
+            <h2>Patrulheiro</h2>
+        </div>
+
+        <div class="classe-option" data-classe="estudioso">
+            <img src="./img/classes/estudioso.png" alt="Estudioso">
+            <h2>Estudioso</h2>
+        </div>
     </div>
 
     <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
@@ -80,7 +94,7 @@
                         personagem_criado: true,
                         nivel: 1,
                         hp: 100,
-                        mana: classe === 'mago' ? 150 : 100
+                        mana: classe === 'estudioso' ? 150 : 100
                     });
                     window.location.href = 'menu.html';
                 } catch (error) {
