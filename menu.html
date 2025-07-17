@@ -6,6 +6,58 @@
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
     <link rel="stylesheet" href="menu.css">
     <title>Menu Principal - RPG</title>
+    <style>
+        /* Adicionando estilos para os submenus */
+        .submenu {
+            display: none;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 10px;
+            animation: fadeIn 0.3s ease-out;
+        }
+        
+        .submenu.active {
+            display: flex;
+        }
+        
+        .submenu-btn {
+            padding: 12px;
+            background-color: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 6px;
+            color: #fff;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        .submenu-btn:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+            transform: translateY(-2px);
+        }
+        
+        .hunting-btn:hover {
+            border-color: #55ff55;
+            color: #55ff55;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .hunting-field-btn {
+            background-color: rgba(85, 255, 85, 0.1);
+        }
+        
+        .hunting-field-btn:hover {
+            background-color: rgba(85, 255, 85, 0.2);
+        }
+    </style>
 </head>
 
 <body>
@@ -61,6 +113,25 @@
                 <button class="location-btn city-btn">
                     <i class='bx bx-buildings'></i> Cidade
                 </button>
+                
+                <!-- Botão de Campos de Caça -->
+                <button class="location-btn hunting-btn" id="hunting-btn">
+                    <i class='bx bx-map'></i> Campos de Caça
+                </button>
+                
+                <!-- Submenu de Campos de Caça -->
+                <div class="submenu" id="hunting-submenu">
+                    <button class="submenu-btn hunting-field-btn" id="field-c1">
+                        <i class='bx bx-leaf'></i> Campo C1
+                    </button>
+                    <button class="submenu-btn hunting-field-btn" disabled>
+                        <i class='bx bx-leaf'></i> Campo C2 (Em breve)
+                    </button>
+                    <button class="submenu-btn hunting-field-btn" disabled>
+                        <i class='bx bx-leaf'></i> Campo C3 (Em breve)
+                    </button>
+                </div>
+                
                 <button class="location-btn dungeon-btn">
                     <i class='bx bx-door-open'></i> Masmorras
                 </button>
@@ -147,7 +218,7 @@
                     // Atualiza imagem
                     const img = document.getElementById('character-image');
                     if (playerData.classe) {
-                        img.src = `./img/classes/${playerData.classe.toLowerCase()}.png`;
+                        img.src = `./img/classes/${playerData.classe.toLowerCase()}.gif`;
                         img.onerror = () => img.src = './img/classes/default.png';
                     }
                 } catch (error) {
@@ -202,6 +273,19 @@
                 console.error("Erro ao deslogar:", error);
                 alert("Erro ao deslogar. Por favor, tente novamente.");
             }
+        });
+
+        // Controle do submenu de Campos de Caça
+        const huntingBtn = document.getElementById('hunting-btn');
+        const huntingSubmenu = document.getElementById('hunting-submenu');
+        const fieldC1Btn = document.getElementById('field-c1');
+
+        huntingBtn.addEventListener('click', () => {
+            huntingSubmenu.classList.toggle('active');
+        });
+
+        fieldC1Btn.addEventListener('click', () => {
+            window.location.href = 'zona-C1.html';
         });
     </script>
 </body>
